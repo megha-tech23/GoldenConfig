@@ -2,50 +2,70 @@
 ! Golden Config Intended Configuration
 ! Device: {{ obj.name }}
 !
- 
 hostname {{ obj.name }}
- 
 !
-! Basic Global Configuration
+! System
 !
- 
 {% if ip_routing is defined and ip_routing %}
 ip routing
 {% endif %}
- 
-{% if domain_name is defined %}
-ip domain name {{ domain_name }}
+{% if config_context.gc.system.domain is defined %}
+ip domain name {{ config_context.gc.system.domain }}
 {% endif %}
- 
-{% if name_servers is defined %}
-{% for dns in name_servers %}
+!
+! DNS from Config Context
+!
+{% if config_context.gc.dns.servers is defined %}
+{% for dns in config_context.gc.dns.servers %}
 ip name-server {{ dns }}
 {% endfor %}
 {% endif %}
- 
 !
 ! SSH
 !
- 
 {% if ssh_timeout is defined %}
 ip ssh time-out {{ ssh_timeout }}
 {% endif %}
- 
 {% if ssh_source_interface is defined %}
 ip ssh source-interface {{ ssh_source_interface }}
 {% endif %}
- 
 !
 ! HTTP / HTTPS
 !
- 
 no ip http server
 ip http secure-server
- 
+!
+! Logging from Config Context
+!
+{% if config_context.gc.logging.servers is defined %}
+{% for server in config_context.gc.logging.servers %}
+logging host {{ server }}
+{% endfor %}
+{% endif %}
+!
+! NTP from Config Context
+!
+{% if config_context.gc.ntp.servers is defined %}
+{% for server in config_context.gc.ntp.servers %}
+ntp server {{ server }}
+{% endfor %}
+{% endif %}
+!
+! SNMP from Config Context
+!
+{% if config_context.gc.snmp.location is defined %}
+snmp-server location {{ config_context.gc.snmp.location }}
+{% endif %}
+!
+! AAA from Config Context
+!
+{% if config_context.gc.aaa.tacacs_group is defined %}
+aaa accounting commands 15 accounting start-stop group {{ config_context.gc.aaa.tacacs_group }}
+aaa accounting system default start-stop group {{ config_context.gc.aaa.tacacs_group }}
+{% endif %}
 !
 ! VLANs
 !
- 
 {% if vlans is defined %}
 {% for vlan in vlans %}
 vlan {{ vlan.id }}
@@ -54,11 +74,9 @@ name {{ vlan.name }}
 {% endif %}
 {% endfor %}
 {% endif %}
- 
 !
 ! Access Interfaces
 !
- 
 {% if access_interfaces is defined %}
 {% for interface in access_interfaces %}
 interface {{ interface.name }}
@@ -69,16 +87,11 @@ switchport mode access
 {% if interface.access_vlan is defined %}
 switchport access vlan {{ interface.access_vlan }}
 {% endif %}
-{% if interface.portfast is defined and interface.portfast %}
-spanning-tree portfast
-{% endif %}
 {% endfor %}
 {% endif %}
- 
 !
 ! Trunk Interfaces
 !
- 
 {% if trunk_interfaces is defined %}
 {% for interface in trunk_interfaces %}
 interface {{ interface.name }}
@@ -94,44 +107,8 @@ switchport trunk allowed vlan {{ interface.allowed_vlans }}
 {% endif %}
 {% endfor %}
 {% endif %}
- 
 !
-! AAA Accounting
-!
- 
-{% if aaa_accounting is defined and aaa_accounting %}
-{% for command_level in aaa_accounting.command_levels %}
-aaa accounting commands {{ command_level }} accounting start-stop group {{ aaa_accounting.tacacs_group }}
-{% endfor %}
-aaa accounting system default start-stop group {{ aaa_accounting.tacacs_group }}
-{% endif %}
- 
-!
-! Logging
-!
- 
-{% if logging_servers is defined %}
-{% for server in logging_servers %}
-logging host {{ server }}
-{% endfor %}
-{% endif %}
- 
-!
-! NTP
-!
- 
-{% if ntp_servers is defined %}
-{% for server in ntp_servers %}
-ntp server {{ server }}
-{% endfor %}
-{% endif %}
- 
-!
-! SNMP
-!
-snmp-server location GOLDEN_LOCATION
 !
 ! End
 !
- 
 end

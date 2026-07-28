@@ -129,12 +129,7 @@ ntp server {{ server }}
 !
 ! SNMP
 !
- 
-{% if snmp_location is defined %}
-snmp-server location {{ snmp_location }}
 snmp-server location GOLDEN_LOCATION
-{% endif %}
- 
 !
 ! End
 !

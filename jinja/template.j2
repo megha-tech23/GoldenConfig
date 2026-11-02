@@ -1,114 +1,49 @@
 !
+
 ! Golden Config Intended Configuration
+
 ! Device: {{ obj.name }}
+
 !
+
+
 hostname {{ obj.name }}
-!
-! System
-!
-{% if ip_routing is defined and ip_routing %}
-ip routing
+
+
+{% if config_context.gc.ssh_source_interface is defined %}
+
+ip ssh source-interface {{ config_context.gc.ssh_source_interface }}
+
 {% endif %}
-{% if config_context.gc.system.domain is defined %}
-ip domain name {{ config_context.gc.system.domain }}
-{% endif %}
-!
-! DNS from Config Context
-!
+
+
 {% if config_context.gc.dns.servers is defined %}
-{% for dns in config_context.gc.dns.servers %}
-ip name-server {{ dns }}
-{% endfor %}
+
+ip name-server {% for dns in config_context.gc.dns.servers %}{{ dns }} {% endfor %}
+
 {% endif %}
-!
-! SSH
-!
-{% if ssh_timeout is defined %}
-ip ssh time-out {{ ssh_timeout }}
-{% endif %}
-{% if ssh_source_interface is defined %}
-ip ssh source-interface {{ ssh_source_interface }}
-{% endif %}
-!
-! HTTP / HTTPS
-!
-no ip http server
-ip http secure-server
-!
-! Logging from Config Context
-!
-{% if config_context.gc.logging.servers is defined %}
-{% for server in config_context.gc.logging.servers %}
-logging host {{ server }}
-{% endfor %}
-{% endif %}
-!
-! NTP from Config Context
-!
+
+
 {% if config_context.gc.ntp.servers is defined %}
-{% for server in config_context.gc.ntp.servers %}
-ntp server {{ server }}
+
+{% for ntp in config_context.gc.ntp.servers %}
+
+ntp server {{ ntp }}
+
 {% endfor %}
+
 {% endif %}
-!
-! SNMP from Config Context
-!
-{% if config_context.gc.snmp.location is defined %}
-snmp-server location {{ config_context.gc.snmp.location }}
-{% endif %}
-!
-! AAA from Config Context
-!
-{% if config_context.gc.aaa.tacacs_group is defined %}
-aaa accounting commands 15 accounting start-stop group {{ config_context.gc.aaa.tacacs_group }}
-aaa accounting system default start-stop group {{ config_context.gc.aaa.tacacs_group }}
-{% endif %}
-!
-! VLANs
-!
-{% if vlans is defined %}
-{% for vlan in vlans %}
-vlan {{ vlan.id }}
-{% if vlan.name is defined %}
-name {{ vlan.name }}
-{% endif %}
+
+
+{% if config_context.gc.logging_servers is defined %}
+
+{% for server in config_context.gc.logging_servers %}
+
+logging host {{ server }}
+
 {% endfor %}
+
 {% endif %}
-!
-! Access Interfaces
-!
-{% if access_interfaces is defined %}
-{% for interface in access_interfaces %}
-interface {{ interface.name }}
-{% if interface.description is defined %}
-description {{ interface.description }}
-{% endif %}
-switchport mode access
-{% if interface.access_vlan is defined %}
-switchport access vlan {{ interface.access_vlan }}
-{% endif %}
-{% endfor %}
-{% endif %}
-!
-! Trunk Interfaces
-!
-{% if trunk_interfaces is defined %}
-{% for interface in trunk_interfaces %}
-interface {{ interface.name }}
-{% if interface.description is defined %}
-description {{ interface.description }}
-{% endif %}
-switchport mode trunk
-{% if interface.native_vlan is defined %}
-switchport trunk native vlan {{ interface.native_vlan }}
-{% endif %}
-{% if interface.allowed_vlans is defined %}
-switchport trunk allowed vlan {{ interface.allowed_vlans }}
-{% endif %}
-{% endfor %}
-{% endif %}
-!
-!
-! End
-!
+
+
 end
